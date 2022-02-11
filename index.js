@@ -10,7 +10,7 @@ if(!process.env.MONGO_ROOT_PASSWORD) {
 let cmd = process.argv[2];
 
 if(!cmd) {
-    console.log("Commands: add <user eppn>, del <user eppn>, list");
+    console.log("Commands: add <user eppn>, del <user eppn>, list, list-tokens");
     return;
 }
 
@@ -35,6 +35,10 @@ switch(cmd) {
 
     case "list":
         listUsers();
+        break;
+
+    case "list-tokens":
+        listTokens();
         break;
 }
 
@@ -79,6 +83,23 @@ function listUsers() {
         
     });
     
+}
+
+function listTokens() {
+    connectToMongo().then((mongoClient) => {
+        let db = mongoClient.db("humlab_speech");
+        const tokenCollection = db.collection("personal_access_tokens");
+        console.log("Tokens:");
+        tokenCollection.find({}).toArray().then((tokenList) => {
+            tokenList.forEach(tokenObj => {
+                console.log(tokenObj.pat);
+            });
+
+            mongoClient.close();
+        });
+
+    });
+
 }
 
 async function connectToMongo() {
