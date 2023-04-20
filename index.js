@@ -42,6 +42,7 @@ if(!allNumbers) {
     return;
 }
 
+
 switch(cmd) {
     case "add":
         if(!userEppn) {
@@ -70,6 +71,30 @@ switch(cmd) {
     case "list-tokens":
         listTokens();
         break;
+
+    case "update-projects":
+        if(!projectIds) {
+            console.log("No project ids provided!");
+            return;
+        }
+        updateProjects(userEppn, projectIds);
+        break;
+}
+
+function updateProjects(userEppn, projectIds) {
+    connectToMongo().then((mongoClient) => {
+        let db = mongoClient.db("visp");
+        const usersCollection = db.collection("users");
+        usersCollection.replaceOne({
+            "eppn": userEppn
+        }, {
+            "eppn": userEppn,
+            "initial_projects": projectIds
+        }).then((result) => {
+            console.log(result);
+            mongoClient.close();
+        });
+    });
 }
 
 function addUser(userEppn, projectIds = []) {
