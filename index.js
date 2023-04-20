@@ -10,11 +10,37 @@ if(!process.env.MONGO_ROOT_PASSWORD) {
 let cmd = process.argv[2];
 
 if(!cmd) {
-    console.log("Commands: add <user eppn>, del <user eppn>, list, list-tokens");
+    console.log("Commands: add <user eppn> <[project ids like: 1,2,3]>, del <user eppn>, list, list-tokens");
     return;
 }
 
 let userEppn = process.argv[3];
+let projectIds = process.argv[4];
+
+if(projectIds) {
+    projectIds = projectIds.split(",");
+    projectIds = projectIds.map((projectId) => {
+        return parseInt(projectId);
+    });
+}
+else {
+    projectIds = [];
+}
+
+//check if projectIds is an array of numbers
+let allNumbers = true;
+if(projectIds.length > 0) {
+    projectIds.forEach((projectId) => {
+        if(isNaN(projectId)) {
+            allNumbers = false;
+        }
+    });
+}
+
+if(!allNumbers) {
+    console.log("If provided, project ids must be comma separated list of numbers!");
+    return;
+}
 
 switch(cmd) {
     case "add":
@@ -22,7 +48,7 @@ switch(cmd) {
             console.log("No user eppn provided!");
             return;
         }
-        addUser(userEppn);
+        addUser(userEppn, projectIds);
         break;
 
     case "del":
@@ -46,12 +72,13 @@ switch(cmd) {
         break;
 }
 
-function addUser(userEppn) {
+function addUser(userEppn, projectIds = []) {
     connectToMongo().then((mongoClient) => {
         let db = mongoClient.db("visp");
         const usersCollection = db.collection("users");
         usersCollection.insertOne({
-            "eppn": userEppn
+            "eppn": userEppn,
+            "initial_projects": projectIds
         }).then((result) => {
             console.log(result);
             mongoClient.close();
