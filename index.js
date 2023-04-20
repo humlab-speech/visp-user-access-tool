@@ -37,6 +37,10 @@ switch(cmd) {
         listUsers();
         break;
 
+    case "dump":
+        dumpUsers();
+        break;
+
     case "list-tokens":
         listTokens();
         break;
@@ -44,7 +48,7 @@ switch(cmd) {
 
 function addUser(userEppn) {
     connectToMongo().then((mongoClient) => {
-        let db = mongoClient.db("humlab_speech");
+        let db = mongoClient.db("visp");
         const usersCollection = db.collection("users");
         usersCollection.insertOne({
             "eppn": userEppn
@@ -57,7 +61,7 @@ function addUser(userEppn) {
 
 function delUser(userEppn) {
     connectToMongo().then((mongoClient) => {
-        let db = mongoClient.db("humlab_speech");
+        let db = mongoClient.db("visp");
         const usersCollection = db.collection("users");
         usersCollection.deleteOne({
             "eppn": userEppn
@@ -70,7 +74,7 @@ function delUser(userEppn) {
 
 function listUsers() {
     connectToMongo().then((mongoClient) => {
-        let db = mongoClient.db("humlab_speech");
+        let db = mongoClient.db("visp");
         const usersCollection = db.collection("users");
         console.log("Users:");
         usersCollection.find({}).toArray().then((usersList) => {
@@ -85,9 +89,26 @@ function listUsers() {
     
 }
 
+function dumpUsers() {
+    connectToMongo().then((mongoClient) => {
+        let db = mongoClient.db("visp");
+        const usersCollection = db.collection("users");
+        console.log("Users:");
+        usersCollection.find({}).toArray().then((usersList) => {
+            usersList.forEach(userObj => {
+                console.log(JSON.stringify(userObj, null, 2));
+            });
+
+            mongoClient.close();
+        });
+
+    });
+
+}
+
 function listTokens() {
     connectToMongo().then((mongoClient) => {
-        let db = mongoClient.db("humlab_speech");
+        let db = mongoClient.db("visp");
         const tokenCollection = db.collection("personal_access_tokens");
         console.log("Tokens:");
         tokenCollection.find({}).toArray().then((tokenList) => {
